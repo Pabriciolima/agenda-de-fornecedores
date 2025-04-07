@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda Premium</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9fafb;
+      color: #374151;
+      transition: all 0.3s ease;
+      margin: 0;
+      padding: 0;
+    }
+    body.dark {
+      background-color: #1e293b;
+      color: #cbd5e1;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button {
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    button:hover {
+      background-color: #4338ca;
+    }
+    .dark button {
+      background-color: #6366f1;
+    }
+    .dark button:hover {
+      background-color: #4f46e5;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #4f46e5;
+      color: white;
+      cursor: pointer;
+      position: relative;
+    }
+    th:hover {
+      background-color: #4338ca;
+    }
+    .dark th {
+      background-color: #6366f1;
+    }
+    .dark th:hover {
+      background-color: #4f46e5;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    .dark tr:nth-child(even) {
+      background-color: #2d3748;
+    }
+    .dark tr {
+      background-color: #1e293b;
+    }
+    .filter-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    input, select {
+      padding: 10px;
+      margin: 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 100%;
+      max-width: 300px;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+    .dark input, .dark select {
+      background-color: #334155;
+      color: #cbd5e1;
+      border-color: #475569;
+    }
+    .hidden {
+      display: none;
+    }
+    .premium-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .dark .premium-card {
+      background-color: #334155;
+      color: #cbd5e1;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .action-buttons button {
+      padding: 8px 15px;
+    }
+    .text-blue-600 {
+      color: #2563eb;
+    }
+    .text-red-600 {
+      color: #dc2626;
+    }
+    .ml-2 {
+      margin-left: 8px;
+    }
+    .sort-indicator {
+      margin-left: 5px;
+    }
+    .no-results {
+      text-align: center;
+      padding: 20px;
+      color: #64748b;
+    }
+    .dark .no-results {
+      color: #94a3b8;
+    }
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .button-group, .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      input, select {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Agenda de Contatos</h1>
+    
+    <div class="button-group">
+      <button id="toggle-dark">
+        <span id="dark-icon">🌙</span> Modo Escuro
+      </button>
+      <button id="toggle-view">
+        <span id="view-icon">👥</span> <span id="view-text">Fornecedores</span>
+      </button>
+      <button id="add-entry">
+        <span>➕</span> Adicionar Contato
+      </button>
+    </div>
+    
+    <div class="filter-group">
+      <input type="text" id="search-nome" placeholder="Buscar por nome...">
+      <select id="state-select">
+        <option value="">Todos os Estados</option>
+        <option value="AC">Acre</option>
+        <option value="AL">Alagoas</option>
+        <option value="AP">Amapá</option>
+        <option value="AM">Amazonas</option>
+        <option value="BA">Bahia</option>
+        <option value="CE">Ceará</option>
+        <option value="DF">Distrito Federal</option>
+        <option value="ES">Espírito Santo</option>
+        <option value="GO">Goiás</option>
+        <option value="MA">Maranhão</option>
+        <option value="MT">Mato Grosso</option>
+        <option value="MS">Mato Grosso do Sul</option>
+        <option value="MG">Minas Gerais</option>
+        <option value="PA">Pará</option>
+        <option value="PB">Paraíba</option>
+        <option value="PR">Paraná</option>
+        <option value="PE">Pernambuco</option>
+        <option value="PI">Piauí</option>
+        <option value="RJ">Rio de Janeiro</option>
+        <option value="RN">Rio Grande do Norte</option>
+        <option value="RS">Rio Grande do Sul</option>
+        <option value="RO">Rondônia</option>
+        <option value="RR">Roraima</option>
+        <option value="SC">Santa Catarina</option>
+        <option value="SP">São Paulo</option>
+        <option value="SE">Sergipe</option>
+        <option value="TO">Tocantins</option>
+      </select>
+    </div>
+    
+    <div id="entry-form" class="hidden premium-card">
+      <div class="form-grid">
+        <div>
+          <label for="nome">Nome*</label>
+          <input type="text" id="nome" placeholder="Nome completo" required>
+        </div>
+        <div>
+          <label for="vendedor">Vendedor</label>
+          <input type="text" id="vendedor" placeholder="Nome do vendedor">
+        </div>
+        <div>
+          <label for="fone">Telefone</label>
+          <input type="text" id="fone" placeholder="(00) 0000-0000">
+        </div>
+        <div>
+          <label for="cel">Celular</label>
+          <input type="text" id="cel" placeholder="(00) 00000-0000">
+        </div>
+        <div>
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="email@exemplo.com">
+        </div>
+        <div>
+          <label for="cidade">Cidade</label>
+          <input type="text" id="cidade" placeholder="Cidade">
+        </div>
+        <div>
+          <label for="estado">Estado</label>
+          <select id="estado">
+            <option value="AC">Acre</option>
+            <option value="AL">Alagoas</option>
+            <option value="AP">Amapá</option>
+            <option value="AM">Amazonas</option>
+            <option value="BA">Bahia</option>
+            <option value="CE">Ceará</option>
+            <option value="DF">Distrito Federal</option>
+            <option value="ES">Espírito Santo</option>
+            <option value="GO">Goiás</option>
+            <option value="MA">Maranhão</option>
+            <option value="MT">Mato Grosso</option>
+            <option value="MS">Mato Grosso do Sul</option>
+            <option value="MG">Minas Gerais</option>
+            <option value="PA">Pará</option>
+            <option value="PB">Paraíba</option>
+            <option value="PR">Paraná</option>
+            <option value="PE">Pernambuco</option>
+            <option value="PI">Piauí</option>
+            <option value="RJ">Rio de Janeiro</option>
+            <option value="RN">Rio Grande do Norte</option>
+            <option value="RS">Rio Grande do Sul</option>
+            <option value="RO">Rondônia</option>
+            <option value="RR">Roraima</option>
+            <option value="SC">Santa Catarina</option>
+            <option value="SP">São Paulo</option>
+            <option value="SE">Sergipe</option>
+            <option value="TO">Tocantins</option>
+          </select>
+        </div>
+      </div>
+      <div class="action-buttons">
+        <button id="cancel-entry">❌ Cancelar</button>
+        <button id="save-entry">💾 Salvar</button>
+      </div>
+    </div>
+    
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortTable('nome')">Nome <span id="sort-nome" class="sort-indicator"></span></th>
+          <th onclick="sortTable('vendedor')">Vendedor <span id="sort-vendedor" class="sort-indicator"></span></th>
+          <th onclick="sortTable('fone')">Telefone <span id="sort-fone" class="sort-indicator"></span></th>
+          <th onclick="sortTable('cel')">Celular <span id="sort-cel" class="sort-indicator"></span></th>
+          <th onclick="sortTable('email')">Email <span id="sort-email" class="sort-indicator"></span></th>
+          <th onclick="sortTable('cidade')">Cidade <span id="sort-cidade" class="sort-indicator"></span></th>
+          <th onclick="sortTable('estado')">Estado <span id="sort-estado" class="sort-indicator"></span></th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="data-table"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // Configurações iniciais
+    let isDark = localStorage.getItem("darkMode") === "true";
+    let currentType = localStorage.getItem("currentType") || "fornecedor";
+    let currentState = localStorage.getItem("currentState") || "";
+    let entries = JSON.parse(localStorage.getItem("agendaEntries")) || [];
+    let editingIndex = null;
+    let sortField = "nome";
+    let sortAsc = true;
+
+    // Elementos DOM
+    const toggleBtn = document.getElementById("toggle-dark");
+    const darkIcon = document.getElementById("dark-icon");
+    const tableBody = document.getElementById("data-table");
+    const entryForm = document.getElementById("entry-form");
+    const addEntryBtn = document.getElementById("add-entry");
+    const saveEntryBtn = document.getElementById("save-entry");
+    const cancelEntryBtn = document.getElementById("cancel-entry");
+    const toggleViewBtn = document.getElementById("toggle-view");
+    const viewText = document.getElementById("view-text");
+    const viewIcon = document.getElementById("view-icon");
+    const stateSelect = document.getElementById("state-select");
+    const searchNomeInput = document.getElementById("search-nome");
+
+    // Inicialização do tema
+    function initTheme() {
+      if (isDark) {
+        document.body.classList.add("dark");
+        darkIcon.textContent = "☀️";
+        toggleBtn.title = "Modo Claro";
+      } else {
+        document.body.classList.remove("dark");
+        darkIcon.textContent = "🌙";
+        toggleBtn.title = "Modo Escuro";
+      }
+    }
+
+    // Alternar tema claro/escuro
+    toggleBtn.addEventListener("click", () => {
+      isDark = !isDark;
+      localStorage.setItem("darkMode", isDark);
+      initTheme();
+    });
+
+    // Configurar visualização (Fornecedores/Transportadoras)
+    function initView() {
+      if (currentType === "fornecedor") {
+        viewText.textContent = "Fornecedores";
+        viewIcon.textContent = "👥";
+        toggleViewBtn.title = "Ver Transportadoras";
+      } else {
+        viewText.textContent = "Transportadoras";
+        viewIcon.textContent = "🚚";
+        toggleViewBtn.title = "Ver Fornecedores";
+      }
+    }
+
+    toggleViewBtn.addEventListener("click", () => {
+      currentType = currentType === "fornecedor" ? "transportadora" : "fornecedor";
+      localStorage.setItem("currentType", currentType);
+      initView();
+      renderTable();
+    });
+
+    // Máscara para telefone
+    function phoneMask(input, isCelular = false) {
+      input.addEventListener("input", (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        
+        if (isCelular) {
+          if (value.length > 11) value = value.substring(0, 11);
+          
+          if (value.length > 2) {
+            value = `(${value.substring(0, 2)}) ${value.substring(2)}`;
+          }
+          if (value.length > 10) {
+            value = `${value.substring(0, 10)}-${value.substring(10)}`;
+          }
+        } else {
+          if (value.length > 10) value = value.substring(0, 10);
+          
+          if (value.length > 2) {
+            value = `(${value.substring(0, 2)}) ${value.substring(2)}`;
+          }
+          if (value.length > 9) {
+            value = `${value.substring(0, 9)}-${value.substring(9)}`;
+          }
+        }
+        
+        e.target.value = value;
+      });
+    }
+
+    // Aplicar máscaras
+    phoneMask(document.getElementById("fone"));
+    phoneMask(document.getElementById("cel"), true);
+
+    // Formatar telefone para exibição
+    function formatPhoneNumber(phone) {
+      if (!phone) return '';
+      const cleaned = phone.replace(/\D/g, '');
+      
+      if (cleaned.length === 11) {
+        return cleaned.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+      } else if (cleaned.length === 10) {
+        return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+      } else if (cleaned.length <= 8) {
+        return cleaned.replace(/(\d{4})(\d{4})/, '$1-$2');
+      }
+      
+      return phone;
+    }
+
+    // Renderizar tabela
+    function renderTable() {
+      tableBody.innerHTML = "";
+
+      const nomeFiltro = searchNomeInput.value.toLowerCase();
+
+      const filtrados = entries
+        .filter(e => e.tipo === currentType)
+        .filter(e => !currentState || e.estado === currentState)
+        .filter(e => e.nome.toLowerCase().includes(nomeFiltro));
+
+      const ordenados = filtrados.sort((a, b) => {
+        const valueA = a[sortField]?.toLowerCase() || '';
+        const valueB = b[sortField]?.toLowerCase() || '';
+        
+        return sortAsc 
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      });
+
+      if (ordenados.length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td colspan="8" class="no-results">
+            Nenhum ${currentType === "fornecedor" ? "fornecedor" : "transportadora"} encontrado
+          </td>`;
+        tableBody.appendChild(row);
+        return;
+      }
+
+      ordenados.forEach((e, i) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${e.nome}</td>
+          <td>${e.vendedor || '-'}</td>
+          <td>${e.fone ? formatPhoneNumber(e.fone) : '-'}</td>
+          <td>${e.cel ? formatPhoneNumber(e.cel) : '-'}</td>
+          <td>${e.email || '-'}</td>
+          <td>${e.cidade || '-'}</td>
+          <td>${e.estado || '-'}</td>
+          <td>
+            <button onclick="editEntry(${i})" class="text-blue-600" title="Editar">✏️</button>
+            <button onclick="deleteEntry(${i})" class="text-red-600 ml-2" title="Excluir">🗑️</button>
+          </td>`;
+        tableBody.appendChild(row);
+      });
+
+      updateSortIndicators();
+    }
+
+    // Atualizar indicadores de ordenação
+    function updateSortIndicators() {
+      document.querySelectorAll(".sort-indicator").forEach(el => {
+        el.textContent = "";
+      });
+      
+      const indicator = document.getElementById(`sort-${sortField}`);
+      if (indicator) {
+        indicator.textContent = sortAsc ? "↑" : "↓";
+      }
+    }
+
+    // Ordenar tabela
+    window.sortTable = (field) => {
+      if (sortField === field) {
+        sortAsc = !sortAsc;
+      } else {
+        sortField = field;
+        sortAsc = true;
+      }
+      renderTable();
+    };
+
+    // Editar entrada
+    window.editEntry = (index) => {
+      const e = entries[index];
+      document.getElementById("nome").value = e.nome || "";
+      document.getElementById("vendedor").value = e.vendedor || "";
+      document.getElementById("fone").value = e.fone || "";
+      document.getElementById("cel").value = e.cel || "";
+      document.getElementById("email").value = e.email || "";
+      document.getElementById("cidade").value = e.cidade || "";
+      document.getElementById("estado").value = e.estado || "SP";
+      entryForm.classList.remove("hidden");
+      editingIndex = index;
+      entryForm.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Excluir entrada
+    window.deleteEntry = (index) => {
+      if (confirm(`Deseja realmente excluir ${entries[index].nome}?`)) {
+        entries.splice(index, 1);
+        saveEntries();
+        renderTable();
+      }
+    };
+
+    // Limpar formulário
+    function clearForm() {
+      document.getElementById("nome").value = "";
+      document.getElementById("vendedor").value = "";
+      document.getElementById("fone").value = "";
+      document.getElementById("cel").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("cidade").value = "";
+      document.getElementById("estado").value = "SP";
+      editingIndex = null;
+    }
+
+    // Salvar entradas no localStorage
+    function saveEntries() {
+      localStorage.setItem("agendaEntries", JSON.stringify(entries));
+    }
+
+    // Adicionar nova entrada
+    addEntryBtn.addEventListener("click", () => {
+      entryForm.classList.remove("hidden");
+      clearForm();
+      entryForm.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Cancelar edição
+    cancelEntryBtn.addEventListener("click", () => {
+      entryForm.classList.add("hidden");
+      clearForm();
+    });
+
+    // Salvar entrada
+    saveEntryBtn.addEventListener("click", () => {
+      const nome = document.getElementById("nome").value.trim();
+      
+      if (!nome) {
+        alert("Por favor, preencha pelo menos o campo Nome");
+        return;
+      }
+
+      const novo = {
+        nome: nome,
+        vendedor: document.getElementById("vendedor").value.trim(),
+        fone: document.getElementById("fone").value.trim(),
+        cel: document.getElementById("cel").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        cidade: document.getElementById("cidade").value.trim(),
+        estado: document.getElementById("estado").value,
+        tipo: currentType
+      };
+
+      if (editingIndex !== null) {
+        entries[editingIndex] = novo;
+      } else {
+        entries.push(novo);
+      }
+
+      saveEntries();
+      entryForm.classList.add("hidden");
+      clearForm();
+      renderTable();
+    });
+
+    // Filtro por estado
+    stateSelect.value = currentState;
+    stateSelect.addEventListener("change", (e) => {
+      currentState = e.target.value;
+      localStorage.setItem("currentState", currentState);
+      renderTable();
+    });
+
+    // Busca por nome
+    searchNomeInput.addEventListener("input", () => {
+      clearTimeout(searchNomeInput.timer);
+      searchNomeInput.timer = setTimeout(renderTable, 300);
+    });
+
+    // Inicialização
+    initTheme();
+    initView();
+    renderTable();
+  </script>
+</body>
+</html>
